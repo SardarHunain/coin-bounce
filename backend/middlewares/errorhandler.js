@@ -1,13 +1,13 @@
 //Imp Note:- error provided by joi is a validation error
-const {validationError} = require('joi')
+const {ValidationError} = require('joi');
 
-const errorHandler = (error,req,res,next) => {
+const errorhandler = (error,req,res,next) => {
     //setting default error
     let status = 500;
     let data = {
         message: 'Internal Server Error'
     }
-    if(error instanceof validationError) {
+    if(error instanceof ValidationError) {
         status = 401;
         data.message = error.message;
 
@@ -25,4 +25,4 @@ const errorHandler = (error,req,res,next) => {
     return res.status(status).json(data);
 }
 
-module.exports = errorHandler;
+module.exports = errorhandler;

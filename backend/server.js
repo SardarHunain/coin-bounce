@@ -1,7 +1,7 @@
 const express = require('express');
 const dbConnect = require('./database/index');
 const router = require('./routes/index');
-const errorHandler = require('./middlewares/errorhandler');
+const errorhandler = require('./middlewares/errorhandler');
 
 const app = express();
 
@@ -14,5 +14,5 @@ dbConnect();
 
 
 
-app.use(errorHandler);
+app.use(errorhandler);
 app.listen(PORT,console.log(`backend is running on port  ${PORT}`));
