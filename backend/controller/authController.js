@@ -2,7 +2,7 @@
 const Joi = require("joi");//input validation library
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");//pkg for hashing passwords
-
+const UserDTO = require("../dto/user");
 
 //password will be a regular expression where we define minimum and max characters in pssword atleast one capital and one  small letter
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,25}$/;
@@ -69,7 +69,9 @@ const authController = {
        const user = await userToRegister.save();
       
 //    6)send response to user
-       return res.status(201).json({user});       
+
+        const userDto = new UserDTO(user);
+       return res.status(201).json({userDto});       
 },
 
 
@@ -92,8 +94,8 @@ const authController = {
         let user;
         try{
             //match username
-             user = await user.findOne({username});
-
+             user = await User.findOne({username});
+            console.log(user);
             if(!user){
                 const error = {
                     status: 401,
@@ -105,7 +107,7 @@ const authController = {
             //match password
             const match = await bcrypt.compare(password, user.password);
 
-            if(!error){
+            if(!match){
                 const error = {
                 status : 401,
                 message: 'invalid password'
@@ -117,7 +119,9 @@ const authController = {
             return next(error);
         }
         
-        return res.status(200).json({user:user});
+
+        const userDto = new UserDTO(user);
+        return res.status(200).json({user:userDto});
         
         // 2)if validation error, send error message using middlewares
         // 3)match user name and password
