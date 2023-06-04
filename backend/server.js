@@ -2,8 +2,10 @@ const express = require('express');
 const dbConnect = require('./database/index');
 const router = require('./routes/index');
 const errorhandler = require('./middlewares/errorhandler');
+const cookieParser = require('cookie-parser');
 
 const app = express();
+app.use(cookieParser());
 
 const PORT = 3000;
 

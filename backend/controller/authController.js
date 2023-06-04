@@ -3,6 +3,8 @@ const Joi = require("joi");//input validation library
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");//pkg for hashing passwords
 const UserDTO = require("../dto/user");
+const JWTService = require("../services/JWTService");
+const RefreshToken = require('../models/token');
 
 //password will be a regular expression where we define minimum and max characters in pssword atleast one capital and one  small letter
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,25}$/;
@@ -59,19 +61,46 @@ const authController = {
         
 
 //    5)store user data in Db
-        const userToRegister = new User({
-            username,//if key and value both are same we can write only one no eror occurs
-            name,
-            email,
-            password: hashedPassword
-        });
-        //console.log(userToRegister);
-       const user = await userToRegister.save();
-      
-//    6)send response to user
+        let accessToken;
+        let refreshToken;
+        let user;
 
+        try{
+            const userToRegister = new User({
+                username,//if key and value both are same we can write only one no eror occurs
+                name,
+                email,
+                password: hashedPassword
+            });
+            //console.log(userToRegister);
+            user = await userToRegister.save();
+            
+           //token generation
+            accessToken = JWTService.signAccessToken({_id:user._id},'30m');
+            refreshToken = JWTService.signRefreshToken({_id:user._id},'60m');
+        }
+        
+        catch(error){
+            return next(error);
+        }
+        //store refresh token in db
+        await JWTService.storeRefreshToken(refreshToken,User._id);
+
+
+        res.cookie('accessToken',accessToken,{
+            maxAge: 1000*60*60*24,//expiry time of cookie
+            httpOnly: true//it means cookie is only accessible at backend. javascript or browser cannot access it
+        });
+
+        res.cookie('refreshToken',refreshToken,{
+            maxAge: 1000*60*60*24,//expiry time of cookie
+            httpOnly: true//it means cookie is only accessible at backend. javascript or browser cannot access it
+        });
+        
+//    6)send response to user
         const userDto = new UserDTO(user);
-       return res.status(201).json({userDto});       
+        
+        return res.status(201).json({user:userDto,auth:true});       
 },
 
 
@@ -119,9 +148,37 @@ const authController = {
             return next(error);
         }
         
+        const accessToken = JWTService.signAccessToken({_id:user._id},'30m'); 
+        const refreshToken = JWTService.signRefreshToken({_id:user._id},'60m');         
+
+        //update refresh token in db
+        try 
+        {
+           await RefreshToken.updateOne({
+            _id:user._id
+            },
+            {token:refreshToken},
+            {upsert:true}
+            )
+        }
+        catch(error)
+        {
+            return next(error);
+        }
+        res.cookie('accessToken',accessToken,{
+            maxAge: 1000*60*60*24,//expiry time of cookie
+            httpOnly: true//it means cookie is only accessible at backend. javascript or browser cannot access it
+        });
+
+        res.cookie('refreshToken',refreshToken,{
+            maxAge: 1000*60*60*24,//expiry time of cookie
+            httpOnly: true//it means cookie is only accessible at backend. javascript or browser cannot access it
+        });
+        
+
 
         const userDto = new UserDTO(user);
-        return res.status(200).json({user:userDto});
+        return res.status(200).json({user:userDto,auth:true});
         
         // 2)if validation error, send error message using middlewares
         // 3)match user name and password

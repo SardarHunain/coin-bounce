@@ -1,6 +1,6 @@
 const { Timestamp } = require('mongodb');
 const mongoose = require('mongoose');
-const {schema} = mongoose;
+const {Schema} = mongoose;
 
 const refreshTokenSchema = Schema({
     token: {type:String, required:true},
