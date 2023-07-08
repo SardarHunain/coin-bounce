@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controller/authController');
+const auth = require('../middlewares/auth');
 //testing
 router.get('/test', (req, res) => res.json({msg:'working!'}))
 
@@ -15,8 +16,12 @@ router.get('/test', (req, res) => res.json({msg:'working!'}))
 */ 
 //REGISTER
 router.post('/register', authController.register);
+
 //LOGIN
 router.post('/login', authController.login);
+
+//LOGOUT
+router.post('/logout',auth, authController.logout);
 /*
     routers for blogs table:--
     1)CRUD operations on blog

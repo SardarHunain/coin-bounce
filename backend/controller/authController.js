@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");//pkg for hashing passwords
 const UserDTO = require("../dto/user");
 const JWTService = require("../services/JWTService");
 const RefreshToken = require('../models/token');
+const { response } = require("express");
 
 //password will be a regular expression where we define minimum and max characters in pssword atleast one capital and one  small letter
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,25}$/;
@@ -185,6 +186,25 @@ const authController = {
         // 4)return response
 
 
+    },
+
+    //logout controller
+    async logout(req,res,next){
+        const {refreshToken}=req.cookies;
+        //delete refresh token from database
+        try{
+            await RefreshToken.deleteOne({token:refreshToken});
+        }
+        catch(error){
+            return next(error);
+        }
+
+        //clear cookie
+        res.clearCookie('accessToken');
+        res.clearCookie('refreshToken');
+
+        //response
+        res.status(200).json({user: null,auth:false});
     }
 }
 module.exports = authController;
