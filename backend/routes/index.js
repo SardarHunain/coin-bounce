@@ -22,6 +22,11 @@ router.post('/login', authController.login);
 
 //LOGOUT
 router.post('/logout',auth, authController.logout);
+
+//REFRESH
+router.get('/refresh', authController.refresh);
+
+
 /*
     routers for blogs table:--
     1)CRUD operations on blog
