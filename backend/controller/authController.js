@@ -114,7 +114,7 @@ const authController = {
         
         
         const {error} = userLoginSchema.validate(req.body);
-        console.log(error);
+        
         if(error){
             return next(error);
         }
