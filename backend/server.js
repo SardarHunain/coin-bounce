@@ -13,6 +13,7 @@ app.use(express.json());//always use this middleware abobe app.use(router). It s
 app.use(router);
 dbConnect();
 
+app.use('storage',express.static('storage'));
 
 
 
