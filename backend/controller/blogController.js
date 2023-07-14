@@ -44,7 +44,7 @@ const blogController = {
                 title,
                 author,
                 content,
-                path:`${BACKEND_SERVER_PATH}/storage/${imagePath}`
+                photoPath:`${BACKEND_SERVER_PATH}/storage/${imagePath}`
 
             });
             await newBlog.save();
