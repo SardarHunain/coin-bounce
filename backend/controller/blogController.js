@@ -94,15 +94,66 @@ const blogController = {
         catch(error){
             return next(error);
         }
-
+        //send response
         const blogDto = new BlogDetailsDTO(blog);
         return res.status(200).json({blog:blogDto});
 
 
-        //send response
+        
     },
     async update(req, res, next) {
+        //validate
+        const updateBlogSchema = Joi.object({
+            title: Joi.string().required(),
+            content: Joi.string().required(),
+            author: Joi.string().regex(mongodbIdPattern).required(),
+            blogId: Joi.string().regex(mongodbIdPattern).required(),
+            photo: Joi.string()
+        });
 
+        const {error} = updateBlogSchema.validate(req.body);
+        
+        const {title,content,author,blogId,photo} = req.body;
+        
+        //if we have to update a photo, we need to delete the photo and save new photo
+        let blog;
+        try{
+            const blog = await Blog.findOne({_id: blogId});
+        }
+        catch(error){
+            return next(error);
+        }
+
+        if(photo)
+        {
+            let previousPhoto = blog.photoPath;
+            previousPhoto = previousPhoto.split('/').at(-1);
+
+            //delete photo
+            fs.unlinkSync(`storage/${previousPhoto}`);
+
+            //save new photo
+            //read as buffer
+            const buffer = Buffer.from(photo.replace(/^data:image\/(png|jpg|jpeg);base64,/,''),'base64');
+            //allot a random name
+            const imagePath = `${Date.now()}-${author}.png`;
+            //save locally
+            try{
+                fs.writeFileSync(`storage/${imagePath}`,buffer);
+            }
+            catch(error){
+                return next(error);
+            }
+
+            await Blog.updateOne({_id:blogId},
+                {title,content,photoPath: `${BACKEND_SERVER_PATH}/storage/${imagePath}`});
+
+        }
+        else{
+            await Blog.updateOne({_id:blogId},{title,content}); 
+        }
+
+        return res.status(200).json({message:'blog updated successfully'});
     },
     async delete(req,res, next) {
 
