@@ -4,6 +4,8 @@ const Blog = require('../models/blogs');
 const { BACKEND_SERVER_PATH } = require('../config/index');
 const BlogDTO = require('../dto/blog');
 const BlogDetailsDTO = require('../dto/blog-details');
+const Comment = require('../models/comment');
+
 
 const mongodbIdPattern = /^[0-9a-fA-F]{24}$/;
 const blogController = {
@@ -155,8 +157,32 @@ const blogController = {
 
         return res.status(200).json({message:'blog updated successfully'});
     },
-    async delete(req,res, next) {
 
+
+    async delete(req,res, next) {
+        //validate
+        const deleteBlogSchema = Joi.object({
+            id: Joi.string().regex(mongodbIdPattern).required(),
+        
+        });
+
+        const {error} = deleteBlogSchema.validate(req.params);
+
+        const{id} = req.params;
+        
+        try{
+            //delete blog
+            await Blog.deleteOne({_id: id});
+             //delete comments on that blog
+             //their can be more than one comments on a blog so we will use deleteMany function here
+            await Comment.deleteMany({blog: id});
+        }
+        catch(error){
+            return next(error);
+        }
+
+        return res.status(200).json({message:"blog deleted successfully"});
+       
     }
 }
 module.exports = blogController;
