@@ -174,7 +174,7 @@ const blogController = {
             //delete blog
             await Blog.deleteOne({_id: id});
              //delete comments on that blog
-             //their can be more than one comments on a blog so we will use deleteMany function here
+             //stheir can be more than one comments on a blog so we will use deleteMany function here
             await Comment.deleteMany({blog: id});
         }
         catch(error){

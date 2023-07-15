@@ -3,6 +3,7 @@ const router = express.Router();
 const authController = require('../controller/authController');
 const auth = require('../middlewares/auth');
 const blogController = require('../controller/blogController');
+const commentController = require('../controller/commentController');
 //testing
 router.get('/test', (req, res) => res.json({msg:'working!'}))
 
@@ -14,6 +15,7 @@ router.get('/test', (req, res) => res.json({msg:'working!'}))
     2)register
     3)logout
     4)refresh
+     these are the routes controlled by auth controller
 */ 
 //REGISTER
 router.post('/register', authController.register);
@@ -52,4 +54,11 @@ router.delete('/blog/:id',auth,blogController.delete);
     1)create a new comment
     2)read comments by blogs id that shows which user commented what at the blog
 */ 
+
+//create comment
+router.post('/comment',auth,commentController.create);
+//get comments
+router.get('/comment/:id',auth,commentController.getById);
+
+
 module.exports = router;
