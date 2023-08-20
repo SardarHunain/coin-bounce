@@ -1,7 +1,16 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { login } from '../../api/internal';
 
 export default function Login() {
+
+  const handleLogin = async ()=>{
+
+    const data = {
+      username: 
+    }
+    const response = await login(data)
+  }
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [usernameError, setUsernameError] = useState('');
@@ -65,7 +74,7 @@ export default function Login() {
             {passwordError && <div className="text-danger">{passwordError}</div>}
           </div>
           <div className='d-grid gap-2 col-6 mx-auto'>
-            <button type="submit" className="btn btn-outline-success"><b>Login</b></button>
+            <button type="submit" className="btn btn-outline-success" onClick={handleLogin}><b>Login</b></button>
           </div>
         </form>
       </div>
